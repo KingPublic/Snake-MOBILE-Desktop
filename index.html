@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Game Ular 2D (Snake Game) sederhana dibuat dengan HTML5 Canvas, CSS3, dan Vanilla JavaScript." />
+  <title>🐍 Snake Game — Game Ular 2D</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="game-container">
+    <!-- Judul Game -->
+    <header class="game-header">
+      <h1 class="game-title">🐍 SNAKE GAME</h1>
+      <p class="game-subtitle">Game Ular 2D — Makan apel, jangan tabrak dinding!</p>
+    </header>
+
+    <!-- Papan Skor -->
+    <section class="scoreboard" aria-label="Papan skor">
+      <div class="score-box">
+        <span class="score-label">Skor</span>
+        <span class="score-value" id="current-score">0</span>
+      </div>
+      <div class="score-box">
+        <span class="score-label">Rekor 🏆</span>
+        <span class="score-value" id="high-score">0</span>
+      </div>
+    </section>
+
+    <!-- Area Permainan -->
+    <section class="canvas-wrapper">
+      <canvas id="game-canvas" width="400" height="400" aria-label="Area permainan ular"></canvas>
+
+      <!-- Overlay: Menu Awal / Pause / Game Over -->
+      <div class="overlay" id="overlay">
+        <div class="overlay-content">
+          <h2 class="overlay-title" id="overlay-title">SNAKE GAME</h2>
+          <p class="overlay-text" id="overlay-text">Geser (swipe) di papan permainan atau tekan tombol di bawah untuk mulai bermain.</p>
+          <button class="btn btn-primary" id="overlay-btn">▶ MULAI</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tombol Kontrol -->
+    <section class="controls" aria-label="Tombol kontrol permainan">
+      <button class="btn" id="btn-start">▶ Mulai</button>
+      <button class="btn" id="btn-pause">⏸ Jeda</button>
+      <button class="btn" id="btn-restart">🔄 Ulangi</button>
+    </section>
+
+    <!-- D-Pad Virtual (untuk perangkat sentuh) -->
+    <section class="dpad" aria-label="Kontrol arah sentuh">
+      <button class="dpad-btn dpad-up" data-direction="up" aria-label="Arah atas">▲</button>
+      <button class="dpad-btn dpad-left" data-direction="left" aria-label="Arah kiri">◀</button>
+      <button class="dpad-btn dpad-down" data-direction="down" aria-label="Arah bawah">▼</button>
+      <button class="dpad-btn dpad-right" data-direction="right" aria-label="Arah kanan">▶</button>
+    </section>
+
+    <!-- Petunjuk Kontrol -->
+    <footer class="instructions">
+      <p class="hint-keyboard">🎮 <strong>Kontrol:</strong> Panah ⬆⬇⬅➡ atau <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> untuk bergerak.</p>
+      <p class="hint-keyboard">⌨️ <kbd>Spasi</kbd> = Mulai / Jeda &nbsp;•&nbsp; <kbd>R</kbd> = Ulangi permainan.</p>
+      <p class="hint-touch">👆 <strong>Geser (swipe)</strong> ke atas ⬆, bawah ⬇, kiri ⬅, atau kanan ➡ di papan permainan untuk mengarahkan ular.</p>
+      <p class="hint-touch">Ketuk papan sekali untuk <strong>mulai</strong> atau <strong>lanjut</strong> bermain.</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

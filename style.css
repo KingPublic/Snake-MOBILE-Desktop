@@ -1,0 +1,336 @@
+/* ============================================
+   SNAKE GAME — Game Ular 2D
+   Tema: Arcade Neon Modern
+   ============================================ */
+
+/* ---------- Reset & Variabel ---------- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Cegah pull-to-refresh, bounce, dan auto-zoom teks di HP */
+html,
+body {
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+:root {
+  --bg-dark: #0f0f1a;
+  --bg-panel: #1a1a2e;
+  --bg-canvas: #16213e;
+  --neon-green: #00ff88;
+  --neon-red: #ff4757;
+  --neon-yellow: #ffd32a;
+  --neon-cyan: #00d2d3;
+  --text-primary: #eaeaea;
+  --text-muted: #8a8a9e;
+  --grid-line: rgba(255, 255, 255, 0.04);
+  --shadow-glow: 0 0 20px rgba(0, 255, 136, 0.25);
+  --radius: 14px;
+}
+
+/* ---------- Body ---------- */
+body {
+  min-height: 100vh;
+  min-height: 100dvh; /* akurat saat bar browser HP muncul / hilang */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  /* Hindari terpotong notch / home indicator iPhone */
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  font-family: "Segoe UI", "Poppins", system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse at top, rgba(0, 210, 211, 0.08), transparent 55%),
+    radial-gradient(ellipse at bottom, rgba(0, 255, 136, 0.07), transparent 55%),
+    var(--bg-dark);
+  color: var(--text-primary);
+}
+
+/* ---------- Kontainer Utama ---------- */
+.game-container {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* margin auto: konten tetap bisa di-scroll penuh di layar HP yang pendek */
+  margin: auto;
+}
+
+/* ---------- Header ---------- */
+.game-header {
+  text-align: center;
+}
+
+.game-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--neon-green);
+  text-shadow: 0 0 12px rgba(0, 255, 136, 0.6), 0 0 32px rgba(0, 255, 136, 0.3);
+}
+
+.game-subtitle {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Papan Skor ---------- */
+.scoreboard {
+  display: flex;
+  gap: 12px;
+}
+
+.score-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.score-box:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.score-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.score-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--neon-yellow);
+  text-shadow: 0 0 10px rgba(255, 211, 42, 0.5);
+}
+
+/* ---------- Area Canvas ---------- */
+.canvas-wrapper {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  /* Geser di area ini = mengarahkan ular, bukan men-scroll / zoom halaman */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  border: 2px solid rgba(0, 255, 136, 0.35);
+  box-shadow: var(--shadow-glow);
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--bg-canvas);
+}
+
+/* ---------- Overlay (Menu / Pause / Game Over) ---------- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(10, 10, 20, 0.85);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.25s ease;
+}
+
+.overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlay-content {
+  text-align: center;
+  padding: 24px;
+}
+
+.overlay-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--neon-green);
+  text-shadow: 0 0 12px rgba(0, 255, 136, 0.6);
+}
+
+.overlay-title.danger {
+  color: var(--neon-red);
+  text-shadow: 0 0 12px rgba(255, 71, 87, 0.6);
+}
+
+.overlay-text {
+  margin: 12px 0 20px;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ---------- Tombol ---------- */
+.btn {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-panel);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  padding: 12px 32px;
+  font-size: 1.05rem;
+  color: #0f0f1a;
+  background: var(--neon-green);
+  border: none;
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:hover {
+  color: #0f0f1a;
+  filter: brightness(1.1);
+}
+
+/* ---------- Kontrol ---------- */
+.controls {
+  display: flex;
+  gap: 10px;
+}
+
+.controls .btn {
+  flex: 1;
+}
+
+/* ---------- D-Pad Virtual ---------- */
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(2, 56px);
+  gap: 8px;
+  justify-content: center;
+}
+
+.dpad-btn {
+  font-size: 1.1rem;
+  color: var(--neon-cyan);
+  background: var(--bg-panel);
+  border: 1px solid rgba(0, 210, 211, 0.35);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad-btn:active {
+  background: rgba(0, 210, 211, 0.2);
+  transform: scale(0.94);
+}
+
+.dpad-up    { grid-column: 2; grid-row: 1; }
+.dpad-left  { grid-column: 1; grid-row: 2; }
+.dpad-down  { grid-column: 2; grid-row: 2; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+
+/* ---------- Petunjuk ---------- */
+.instructions {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* Petunjuk khusus swipe — disembunyikan sampai perangkatnya sentuh */
+.hint-touch {
+  display: none;
+}
+
+kbd {
+  padding: 2px 7px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  color: var(--neon-yellow);
+  background: rgba(255, 211, 42, 0.1);
+  border: 1px solid rgba(255, 211, 42, 0.3);
+  border-radius: 5px;
+}
+
+/* ---------- Responsif (Mobile) ---------- */
+@media (max-width: 480px) {
+  .game-title {
+    font-size: 1.7rem;
+    letter-spacing: 2px;
+  }
+
+  .score-value {
+    font-size: 1.3rem;
+  }
+
+
+/* ---------- Perangkat sentuh: swipe menggantikan tombol D-Pad ---------- */
+@media (hover: none) and (pointer: coarse) {
+  .dpad {
+    display: none;
+  }
+
+  .hint-keyboard {
+    display: none;
+  }
+
+  .hint-touch {
+    display: block;
+  }
+}
+
+/* Cadangan: deteksi sentuh lewat JS (bila media query di atas tidak akurat) */
+.touch-device .dpad {
+  display: none;
+}
+
+.touch-device .hint-keyboard {
+  display: none;
+}
+
+.touch-device .hint-touch {
+  display: block;
+}
+  .dpad {
+    grid-template-columns: repeat(3, 72px);
+    grid-template-rows: repeat(2, 60px);
+  }
+}
